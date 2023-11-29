@@ -1,44 +1,21 @@
-Data inserted into database: Array
-(
-    [sensor] => world
-    [value] => 3.45
-    [timestamp] => 
-)
-Data inserted into database: Array
-(
-    [sensor] => world
-    [value] => 3.335
-    [timestamp] => 
-)
-Data inserted into database: Array
-(
-    [sensor] => world
-    [value] => 3.335
-    [timestamp] => 
-)
-Data inserted into database: Array
-(
-    [sensor] => world
-    [value] => 3.335
-    [timestamp] => 
-)
-Webhook received: Array
-(
-    [sensor] => world
-    [value] => 3.335
-)
-Webhook received: Array
-(
-    [sensor] => world
-    [value] => 3.335
-)
-Webhook received: Array
-(
-    [sensor] => world
-    [value] => 3.335
-)
-Webhook received: Array
-(
-    [sensor] => world
-    [value] => 3.335
-)
+Key: hello, Value: hallo 
+Key: world, Value: 3.33 
+Key: timestamp, Value: 2023-11-29T17:06:03.478120093Z 
+
+Key: hello, Value: hallo 
+Key: world, Value: 3.33 
+Key: timestamp, Value: 2023-11-29T17:06:03.478120093Z 
+
+
+Timestamp: 2023-11-29T17:06:03.478120093Z 
+hello: 42 
+world: 3.33 
+
+
+hello: 42 
+hello: 42 
+hello: 42 
+world: 3.33 
+hello: 42 
+hello: 42 
+world: 3.33 
