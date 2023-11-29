@@ -20,7 +20,8 @@ if (!array_key_exists('received_at', $payload) || !array_key_exists('uplink_mess
     die('Malformed JSON data. Did not find uplink_message.decoded_payload or received_at');
 }
 $decodedValues = $payload['uplink_message']['decoded_payload'];
-$timestamp = date('Y-m-d H:i:s', strtotime($payload['received_at']));
+$parsed_date = new DateTime($payload['received_at']);
+$timestamp = $parsed_date->format("Y-m-d H:i:s");
 
 
 if (isset($servername)) {

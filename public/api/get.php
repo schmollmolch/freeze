@@ -2,7 +2,7 @@
 
 include_once('../config/config.php');
 
-$value_count = 1;
+$value_count = null;
 if (array_key_exists('value_count', $_GET)) {
     $value_count = $_GET["value_count"];
 }
@@ -11,6 +11,8 @@ $sensor = null;
 if (array_key_exists('sensor', $_GET)) {
     $sensor = $_GET["sensor"];
 }
+
+$latest = array_key_exists('latest', $_GET);
 
 if (isset($servername)) {
     // Create a database connection
@@ -32,6 +34,10 @@ if (isset($servername)) {
 
 function getSensorValues($conn, $sensor, $value_count)
 {
+    if ($value_count === null) {
+        $value_count = 1;
+    }
+
     // Process the data and store it in the database
     // Customize the SQL query based on your database schema
     $sql = "SELECT * FROM freeze_data WHERE sensor_name=? ORDER BY timestamp DESC LIMIT ?";
@@ -59,9 +65,21 @@ function getSensorValues($conn, $sensor, $value_count)
 
 function getAllSensors($conn, $value_count)
 {
+
+    if ($value_count === null) {
+        $value_count = 100;
+    }
+
     // Process the data and store it in the database
     // Customize the SQL query based on your database schema
-    $sql = "SELECT DISTINCT sensor_name FROM freeze_data LIMIT ?";
+    $sql = "SELECT sensor_name, sensor_value, timestamp
+FROM (
+    SELECT sensor_name, sensor_value, timestamp,
+           ROW_NUMBER() OVER (PARTITION BY sensor_name ORDER BY timestamp DESC) AS row_num
+    FROM freeze_data
+) ranked
+WHERE row_num = 1 LIMIT ?";
+
     $stmt = $conn->prepare($sql);
 
     // Bind parameters
