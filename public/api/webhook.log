@@ -1,0 +1,44 @@
+Data inserted into database: Array
+(
+    [sensor] => world
+    [value] => 3.45
+    [timestamp] => 
+)
+Data inserted into database: Array
+(
+    [sensor] => world
+    [value] => 3.335
+    [timestamp] => 
+)
+Data inserted into database: Array
+(
+    [sensor] => world
+    [value] => 3.335
+    [timestamp] => 
+)
+Data inserted into database: Array
+(
+    [sensor] => world
+    [value] => 3.335
+    [timestamp] => 
+)
+Webhook received: Array
+(
+    [sensor] => world
+    [value] => 3.335
+)
+Webhook received: Array
+(
+    [sensor] => world
+    [value] => 3.335
+)
+Webhook received: Array
+(
+    [sensor] => world
+    [value] => 3.335
+)
+Webhook received: Array
+(
+    [sensor] => world
+    [value] => 3.335
+)
