@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freezing Beerhouse Bar Chart</title>
+    <!-- Include Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div style="width: 80%; margin: auto;">
+        <!-- Canvas element to render the chart -->
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Get the canvas element
+            var ctx = document.getElementById('myChart').getContext('2d');
+
+            // Make a GET request to the REST endpoint
+            fetch('../api/get.php')
+                .then(response => response.json())
+                .then(data => {
+
+                    // Create a bar chart
+                    var myChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.map(d=>d.sensor_name),
+                            datasets: [{
+                                label: 'Freezing Beerhouse',
+                                data:  data.map(d => d.sensor_value),
+                                backgroundColor: 'rgba(0, 128, 128, 0.2)',
+                                borderColor: 'rgba(0, 128, 128, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        });
+    </script>
+</body>
+
+</html>
