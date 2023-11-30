@@ -1,55 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Freezing Beerhouse Bar Chart</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="cache-control" content="max-age=1200" />
+    <title>Freezing Beerhouse Temperature Chart</title>
     <!-- Include Chart.js library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+  </head>
 
-<body>
-    <div style="width: 80%; margin: auto;">
-        <!-- Canvas element to render the chart -->
-        <canvas id="myChart"></canvas>
+  <body>
+    <div style="width: 80%; margin: auto">
+      <!-- Canvas element to render the chart -->
+      <canvas id="myChart"></canvas>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Get the canvas element
-            var ctx = document.getElementById('myChart').getContext('2d');
+      document.addEventListener('DOMContentLoaded', function () {
+        // Get the canvas element
+        const ctx = document.getElementById('myChart').getContext('2d');
 
-            // Make a GET request to the REST endpoint
-            fetch('../api/get.php')
-                .then(response => response.json())
-                .then(data => {
+        const searchParams = new URLSearchParams(window.location.search);
+        if (searchParams.has('sensor')) {
+          const valueCount = 3 * 72; //history of 3 days with updates every 20 minutes
+          // Make a GET request to the REST endpoint
+          fetch(
+            '../api/get.php?value_count=' +
+              valueCount +
+              '&sensor=' +
+              searchParams.get('sensor')
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              // Create a line chart
+              //reverse data as it is new-to-old
+              data.reverse();
 
-                    // Create a bar chart
-                    var myChart = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: data.map(d=>d.sensor_name),
-                            datasets: [{
-                                label: 'Freezing Beerhouse',
-                                data:  data.map(d => d.sensor_value),
-                                backgroundColor: 'rgba(0, 128, 128, 0.2)',
-                                borderColor: 'rgba(0, 128, 128, 1)',
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            scales: {
-                                y: {
-                                    beginAtZero: true
-                                }
-                            }
-                        }
-                    });
-                })
-                .catch(error => console.error('Error fetching data:', error));
-        });
+              var myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                  labels: data.map((d) =>
+                    luxon.DateTime.fromSQL(d.timestamp + 'Z').toLocaleString(
+                      luxon.DateTime.DATETIME_SHORT
+                    )
+                  ),
+                  datasets: [
+                    {
+                      label:
+                        'Freezing Beerhouse - ' + searchParams.get('sensor'),
+                      data: data.map((d) => d.sensor_value),
+                      backgroundColor: 'rgba(0, 128, 128, 0.2)',
+                      borderColor: 'rgba(0, 128, 128, 1)',
+                      borderWidth: 1,
+                    },
+                  ],
+                },
+                options: {
+                  events: ['click'],
+                  onClick: (evt) => {
+                    window.location.href = window.location.href.substring(
+                      0,
+                      window.location.href.indexOf('?')
+                    );
+                  },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                    },
+                  },
+                  elements: {
+                    point: {
+                      pointStyle: false,
+                    },
+                  },
+                },
+              });
+            })
+            .catch((error) => console.error('Error fetching data:', error));
+        } else {
+          // Make a GET request to the REST endpoint
+          fetch('../api/get.php')
+            .then((response) => response.json())
+            .then((data) => {
+              // Create a bar chart
+              var myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                  labels: data.map((d) => d.sensor_name),
+                  datasets: [
+                    {
+                      label: 'Freezing Beerhouse',
+                      data: data.map((d) => d.sensor_value),
+                      backgroundColor: 'rgba(0, 128, 128, 0.2)',
+                      borderColor: 'rgba(0, 128, 128, 1)',
+                      borderWidth: 1,
+                    },
+                  ],
+                },
+                options: {
+                  events: ['click'],
+                  onClick: (evt) => {
+                    const points = myChart.getElementsAtEventForMode(
+                      evt,
+                      'nearest',
+                      { intersect: true },
+                      true
+                    );
+
+                    if (points.length) {
+                      const firstPoint = points[0];
+                      const selectedLabel =
+                        myChart.data.labels[firstPoint.index];
+                      window.location.href =
+                        window.location.href + '?sensor=' + selectedLabel;
+                    }
+                  },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                    },
+                  },
+                },
+              });
+            })
+            .catch((error) => console.error('Error fetching data:', error));
+        }
+      });
     </script>
-</body>
-
+  </body>
 </html>
