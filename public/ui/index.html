@@ -7,6 +7,7 @@
     <title>Freezing Beerhouse Temperature Chart</title>
     <!-- Include Chart.js library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
   </head>
 
@@ -17,6 +18,20 @@
     </div>
 
     <script>
+      const colorize = (opaque) => {
+        return (ctx) => {
+          const v = ctx.parsed
+            ? ctx.parsed.y /** bar */
+            : ctx.p0.parsed.y; /** line */
+          const red = Math.min(255, Math.max(0, Math.round(255 - v * 60)));
+          const green = Math.min(255, Math.max(0, Math.round(v * 60)));
+          return `rgba(${red}, ${green}, 0, ${opaque ? 1 : 0.2})`;
+          // return v > 0
+          //   ? `rgba(0, 255, 0, ${opaque ? 1 : 0.2})`
+          //   : `rgba(255, 0, 0, ${opaque ? 1 : 0.2})`;
+        };
+      };
+
       document.addEventListener('DOMContentLoaded', function () {
         // Get the canvas element
         const ctx = document.getElementById('myChart').getContext('2d');
@@ -37,6 +52,21 @@
               //reverse data as it is new-to-old
               data.reverse();
 
+              // const colorize = (ctx) => {
+              // const gradient = ctx.p1.parsed.y - ctx.p0.parsed.y;
+              // console.log(gradient);
+              // const red = Math.min(
+              //   255,
+              //   Math.max(0, Math.round(gradient * 80))
+              // );
+              // const green = Math.min(
+              //   255,
+              //   Math.max(0, Math.round(255 - gradient * 80))
+              // );
+              // return `rgba(${red}, ${green}, 0, 1)`;
+              // return gradient > 0 ? '#00ff00' : '#ff0000';
+              // };
+
               var myChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -50,9 +80,10 @@
                       label:
                         'Freezing Beerhouse - ' + searchParams.get('sensor'),
                       data: data.map((d) => d.sensor_value),
-                      backgroundColor: 'rgba(0, 128, 128, 0.2)',
-                      borderColor: 'rgba(0, 128, 128, 1)',
                       borderWidth: 1,
+                      segment: {
+                        borderColor: colorize(true),
+                      },
                     },
                   ],
                 },
@@ -85,6 +116,7 @@
             .then((data) => {
               // Create a bar chart
               var myChart = new Chart(ctx, {
+                plugins: [ChartDataLabels],
                 type: 'bar',
                 data: {
                   labels: data.map((d) => d.sensor_name),
@@ -92,15 +124,21 @@
                     {
                       label: 'Freezing Beerhouse',
                       data: data.map((d) => d.sensor_value),
-                      backgroundColor: 'rgba(0, 128, 128, 0.2)',
-                      borderColor: 'rgba(0, 128, 128, 1)',
                       borderWidth: 1,
                     },
                   ],
                 },
                 options: {
+                  elements: {
+                    bar: {
+                      backgroundColor: colorize(false),
+                      borderColor: colorize(true),
+                      borderWidth: 2,
+                    },
+                  },
+
                   events: ['click'],
-                  onClick: (evt) => {
+                  onClick: (evt, activeElement) => {
                     const points = myChart.getElementsAtEventForMode(
                       evt,
                       'nearest',
@@ -114,13 +152,24 @@
                         myChart.data.labels[firstPoint.index];
                       window.location.href =
                         window.location.href + '?sensor=' + selectedLabel;
+                    } else if (activeElement?.length) {
+                      const datasetIndex = activeElement[0].datasetIndex;
+                      const selectedLabel =
+                        myChart.data.datasets[datasetIndex].label;
+                      window.location.href =
+                        window.location.href + '?sensor=' + selectedLabel;
+                    } else {
+                      console.log('No idea where you clicked at.');
+                      console.log(evt);
                     }
                   },
                   scales: {
                     y: {
                       beginAtZero: true,
+                      position: 'left',
                     },
                   },
+                  responsive: true,
                 },
               });
             })
